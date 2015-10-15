@@ -9,7 +9,7 @@ public class TerminalManager implements Runnable
 {
     private ProcessBuilder ps;
     private  BufferedReader in, error;
-    private BufferedWriter bw;//jk its lagged as fuck
+    private BufferedWriter bw;
     private Process pr;
     private Thread thread;
 
@@ -18,6 +18,14 @@ public class TerminalManager implements Runnable
         try
         {
             init(command);
+
+            Runtime.getRuntime().addShutdownHook(new Thread()
+            {
+                public void run()
+                {
+                        kill();
+                }
+            });
         }
         catch(Exception ex)
         {
@@ -47,15 +55,20 @@ public class TerminalManager implements Runnable
 
     public void kill()
     {
+        if(pr.isAlive())
+            pr.destroy();
+
         try
         {
             bw.write('\u0003');
-            bw.flush();
         }
         catch(Exception ex)
         {
             System.out.println("Error sending escape sequence :(");
         }
+
+        thread.interrupt();
+        thread.interrupt();
     }
 
     @Override
@@ -83,10 +96,13 @@ public class TerminalManager implements Runnable
                     System.out.println("Script execution halted!");
                     in.close();
                 }
+
+                System.out.flush();
             }
             catch(Exception ex)
             {
                 System.out.println("Error in terminal: " + ex.getMessage());
+                Main.running = false;
             }
         }
 
