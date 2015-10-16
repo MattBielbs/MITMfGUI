@@ -1,6 +1,8 @@
 package com.MITHfGUI;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by root on 15/10/15.
@@ -25,25 +27,36 @@ public class MITMSession extends JFrame
 
     private void init()
     {
-        //cd to the script
-        String command = "cd " + dir;
-
-        //Build the command
-        command = command.concat(" && python mitmf.py -i " + inter + " ");
+        List<String> commands = new ArrayList<String>();
+        commands.add("python");
+        commands.add("mitmf.py");
+        commands.add("-i");
+        commands.add(inter);
 
         if(ARP)
-            command = command.concat("--arp --spoof ");
+        {
+            commands.add("--arp");
+            commands.add("--spoof");
+        }
         if(HSTS)
-            command = command.concat("--hsts --dns ");
+        {
+            commands.add("--hsts");
+            commands.add("--dns");
+        }
         if(screenShot)
-            command = command.concat("--screen ");
+            commands.add("--screen");
         if(keyLogger)
-            command = command.concat("--jskeylogger ");
+            commands.add("--jskeylogger");
+
         if(!params.isEmpty())
-            command = command.concat(params);
+        {
+            String[] split = params.split(" ");
+            for(String s : split)
+                commands.add(s);
+        }
 
         //Start the terminal.
-        tm = new TerminalManager(command);
+        tm = new TerminalManager(dir, commands);
     }
 
     public TerminalManager getTm()
